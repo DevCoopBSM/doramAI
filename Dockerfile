@@ -7,8 +7,15 @@ WORKDIR /app
 # 의존성 파일 복사
 COPY requirements.txt .
 
-# 의존성 설치
+# 로컬에서 클론한 py-hanspell 디렉토리 복사
+COPY py-hanspell ./py-hanspell
+
+# py-hanspell의 requirements.txt 설치
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r py-hanspell/requirements.txt
+
+# py-hanspell의 setup.py 설치
+RUN pip install --no-cache-dir ./py-hanspell
 
 # 애플리케이션 코드 복사
 COPY . .
