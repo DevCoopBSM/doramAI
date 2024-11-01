@@ -1,9 +1,14 @@
-from openai import OpenAI
 import os
+from openai import OpenAI
+from dotenv import load_dotenv
 
-# API_KEY가져옴
+# .env 파일 로드
+load_dotenv()
+
+# API_KEY 가져오기
 my_key = os.getenv("API_KEY")
 client = OpenAI(api_key=my_key)
+
 
 def generate_feedback(text, categories):
     keyword = ', '.join(categories)
