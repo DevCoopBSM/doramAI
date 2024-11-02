@@ -2,8 +2,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import logging
+from typing import Dict, Any
 from feedback import generate_feedback
 from spelling import check_spelling  # spelling.py 임포트
+
+# 로깅 설정
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -35,12 +41,21 @@ async def get_feedback(request: FeedbackRequest):
 @app.post("/check-spelling/")
 async def check_spelling_endpoint(request: SpellingRequest):
     try:
+        logger.info(f"Received spelling check request: {request.text}")
         corrections = check_spelling(request.text)
+        logger.info(f"Spelling check result: {corrections}")
         return {"corrections": corrections}
     except Exception as e:
-        # 에러 발생 시 요청 내용과 에러 메시지를 로그로 출력
-        print(f"Error occurred while checking spelling for text: {request.text}")
-        print(f"Error details: {str(e)}")
-        
-        # 클라이언트에게 더 구체적인 에러 메시지 반환
-        raise HTTPException(status_code=500, detail={"error": "Internal Server Error", "message": str(e)})
+        logger.error(f"Error in spelling check: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Internal Server Error",
+                "message": str(e),
+                "type": type(e).__name__
+            }
+        )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
